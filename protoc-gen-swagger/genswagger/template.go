@@ -13,38 +13,38 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	pbdescriptor "github.com/golang/protobuf/protoc-gen-go/descriptor"
-	"github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway/descriptor"
-	swagger_options "github.com/grpc-ecosystem/grpc-gateway/protoc-gen-swagger/options"
+	"github.com/nedscode/grpc-gateway/protoc-gen-grpc-gateway/descriptor"
+	swagger_options "github.com/nedscode/grpc-gateway/protoc-gen-swagger/options"
 )
 
 var wktSchemas = map[string]schemaCore{
-	".google.protobuf.Timestamp": schemaCore{
+	".google.protobuf.Timestamp": {
 		Type:   "string",
 		Format: "date-time",
 	},
-	".google.protobuf.Duration": schemaCore{
+	".google.protobuf.Duration": {
 		Type: "string",
 	},
-	".google.protobuf.StringValue": schemaCore{
+	".google.protobuf.StringValue": {
 		Type: "string",
 	},
-	".google.protobuf.Int32Value": schemaCore{
+	".google.protobuf.Int32Value": {
 		Type:   "integer",
 		Format: "int32",
 	},
-	".google.protobuf.Int64Value": schemaCore{
+	".google.protobuf.Int64Value": {
 		Type:   "integer",
 		Format: "int64",
 	},
-	".google.protobuf.FloatValue": schemaCore{
+	".google.protobuf.FloatValue": {
 		Type:   "number",
 		Format: "float",
 	},
-	".google.protobuf.DoubleValue": schemaCore{
+	".google.protobuf.DoubleValue": {
 		Type:   "number",
 		Format: "double",
 	},
-	".google.protobuf.BoolValue": schemaCore{
+	".google.protobuf.BoolValue": {
 		Type:   "boolean",
 		Format: "boolean",
 	},
@@ -52,7 +52,7 @@ var wktSchemas = map[string]schemaCore{
 
 func listEnumNames(enum *descriptor.Enum) (names []string) {
 	for _, value := range enum.GetValue() {
-		names = append(names, value.GetName())
+		names = append(names, fmt.Sprintf("%d => %s", value.GetNumber(), value.GetName()))
 	}
 	return names
 }
@@ -60,7 +60,7 @@ func listEnumNames(enum *descriptor.Enum) (names []string) {
 func getEnumDefault(enum *descriptor.Enum) string {
 	for _, value := range enum.GetValue() {
 		if value.GetNumber() == 0 {
-			return value.GetName()
+			return fmt.Sprintf("%d => %s", value.GetNumber(), value.GetName())
 		}
 	}
 	return ""
@@ -123,11 +123,11 @@ func queryParams(message *descriptor.Message, field *descriptor.Field, prefix st
 			}
 			if items != nil { // array
 				param.Items = &swaggerItemsObject{
-					Type: "string",
+					Type: "integer",
 					Enum: listEnumNames(enum),
 				}
 			} else {
-				param.Type = "string"
+				param.Type = "integer"
 				param.Enum = listEnumNames(enum)
 				param.Default = getEnumDefault(enum)
 			}
@@ -370,7 +370,7 @@ func renderEnumerationsAsDefinition(enums enumMap, d swaggerDefinitionsObject, r
 		}
 		enumSchemaObject := swaggerSchemaObject{
 			schemaCore: schemaCore{
-				Type:    "string",
+				Type:    "integer",
 				Enum:    enumNames,
 				Default: defaultValue,
 			},
